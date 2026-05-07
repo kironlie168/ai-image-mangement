@@ -1,0 +1,8 @@
+#!/bin/bash
+DIR="$(cd "$(dirname "$0")" && pwd)"
+exec "$JAVA_HOME/bin/java" \
+  $MAVEN_OPTS \
+  -classpath "$DIR/.mvn/wrapper/maven-wrapper.jar" \
+  "-Dmaven.multiModuleProjectDirectory=$DIR" \
+  org.apache.maven.wrapper.MavenWrapperMain \
+  "$@"
