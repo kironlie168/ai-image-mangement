@@ -4,6 +4,8 @@ import { useTagStore } from '@/stores/tagStore'
 import { storeToRefs } from 'pinia'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
+import PageHeader from '@/components/PageHeader.vue'
+import { textColor, hexToRgb } from '@/utils/color'
 
 const tagStore = useTagStore()
 const { tags, loading } = storeToRefs(tagStore)
@@ -60,33 +62,11 @@ async function deleteTag(id: number, name: string) {
   } catch { /* cancelled */ }
 }
 
-function textColor(hex: string) {
-  const c = hex.replace('#', '')
-  const r = parseInt(c.substring(0, 2), 16)
-  const g = parseInt(c.substring(2, 4), 16)
-  const b = parseInt(c.substring(4, 6), 16)
-  return (r * 0.299 + g * 0.587 + b * 0.114) > 160 ? '#1e293b' : '#fff'
-}
-
-function hexToRgb(hex: string) {
-  const c = hex.replace('#', '')
-  const r = parseInt(c.substring(0, 2), 16)
-  const g = parseInt(c.substring(2, 4), 16)
-  const b = parseInt(c.substring(4, 6), 16)
-  return `${r}, ${g}, ${b}`
-}
 </script>
 
 <template>
   <div class="tag-view">
-    <!-- Header -->
-    <div class="page-header">
-      <div class="header-text">
-        <h1 class="page-title">Tag Management</h1>
-        <p class="page-subtitle">Organize your images with labels and colors</p>
-      </div>
-      <div class="header-accent" />
-    </div>
+    <PageHeader title="Tag Management" subtitle="Organize your images with labels and colors" />
 
     <!-- Toolbar -->
     <div class="toolbar">
@@ -215,37 +195,6 @@ function hexToRgb(hex: string) {
   max-width: 960px;
   margin: 0 auto;
   padding: 8px 0;
-}
-
-/* ============ Header ============ */
-.page-header {
-  margin-bottom: 24px;
-}
-
-.header-text {
-  margin-bottom: 14px;
-}
-
-.page-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #1e293b;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  margin-bottom: 6px;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-
-.header-accent {
-  height: 3px;
-  width: 72px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
 }
 
 /* ============ Toolbar ============ */

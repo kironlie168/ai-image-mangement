@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue'
 import { browse, getDrives } from '@/api/fileApi'
 import type { DirEntry } from '@/api/fileApi'
 import { ElMessage } from 'element-plus'
-import { FolderOpened, Folder, Document } from '@element-plus/icons-vue'
+import { FolderOpened, Document } from '@element-plus/icons-vue'
 
 const emit = defineEmits<{
   select: [path: string]
@@ -69,9 +69,6 @@ function selectCurrent() {
   }
 }
 
-function entryIcon(entry: DirEntry) {
-  return entry.isDirectory ? FolderOpened : Document
-}
 </script>
 
 <template>

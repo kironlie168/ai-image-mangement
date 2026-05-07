@@ -1,5 +1,6 @@
 import http from './http'
 import type { ImageDto, ImageFilters, FileMetadataPreview, PageResponse } from '@/types/image'
+import { downloadBlob } from '@/utils/download'
 
 export async function fetchImages(filters: ImageFilters, page: number, size: number, sort: string) {
   const params: Record<string, string | number | boolean> = { page, size, sort }
@@ -95,24 +96,10 @@ export async function downloadImage(id: number) {
     const match = disposition.match(/filename\*?=(?:UTF-\d'')?([^;\s]+)/i)
     if (match) filename = decodeURIComponent(match[1])
   }
-  const url = URL.createObjectURL(res.data)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  downloadBlob(res.data, filename)
 }
 
 export async function downloadWorkflow(id: number) {
   const res = await http.get(`/images/${id}/workflow`, { responseType: 'blob' })
-  const url = URL.createObjectURL(res.data)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `workflow_${id}.json`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
+  downloadBlob(res.data, `workflow_${id}.json`)
 }

@@ -2,13 +2,15 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useImageStore } from '@/stores/imageStore'
 import { ElMessage } from 'element-plus'
-import { Upload, FolderOpened, Check, Close, ArrowDown } from '@element-plus/icons-vue'
+import { Upload, FolderOpened, Check, Close } from '@element-plus/icons-vue'
 import type { UploadUserFile } from 'element-plus'
 import DirectoryPicker from '@/components/DirectoryPicker.vue'
 import { previewMetadata } from '@/api/imageApi'
-import { getStats, formatBytes } from '@/api/fileApi'
+import { getStats } from '@/api/fileApi'
 import type { StorageStats } from '@/api/fileApi'
 import type { FileMetadataPreview } from '@/types/image'
+import { formatFileSize } from '@/utils/format'
+import PageHeader from '@/components/PageHeader.vue'
 
 const imageStore = useImageStore()
 
@@ -167,14 +169,7 @@ async function handleScan() {
 
 <template>
   <div class="upload-view">
-    <!-- Page Header -->
-    <div class="page-header">
-      <div class="header-text">
-        <h1 class="page-title">Upload Images</h1>
-        <p class="page-subtitle">Import AI-generated images to your library</p>
-      </div>
-      <div class="header-accent" />
-    </div>
+    <PageHeader title="Upload Images" subtitle="Import AI-generated images to your library" :margin-bottom="28" />
 
     <div class="upload-layout">
       <!-- Left Column: Upload -->
@@ -343,7 +338,7 @@ async function handleScan() {
           <h3 class="stats-title">Storage</h3>
           <div class="stats-grid">
             <div class="stat-item">
-              <span class="stat-value">{{ formatBytes(stats.usedBytes) }}</span>
+              <span class="stat-value">{{ formatFileSize(stats.usedBytes) }}</span>
               <span class="stat-label">Disk Used</span>
             </div>
             <div class="stat-item">
@@ -409,37 +404,6 @@ async function handleScan() {
   max-width: 1280px;
   margin: 0 auto;
   padding: 8px 0;
-}
-
-/* ============ Header ============ */
-.page-header {
-  margin-bottom: 28px;
-}
-
-.header-text {
-  margin-bottom: 14px;
-}
-
-.page-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #1e293b;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  margin-bottom: 6px;
-}
-
-.page-subtitle {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-
-.header-accent {
-  height: 3px;
-  width: 72px;
-  border-radius: 4px;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
 }
 
 /* ============ Two-column layout ============ */

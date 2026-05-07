@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ImageDto } from '@/types/image'
-import { ElImage } from 'element-plus'
+import { formatFileSize } from '@/utils/format'
 
 const props = defineProps<{
   image: ImageDto
@@ -14,15 +14,6 @@ const emit = defineEmits<{
   favorite: []
   delete: []
 }>()
-
-function formatFileSize(bytes: number): string {
-  if (!bytes) return ''
-  const units = ['B', 'KB', 'MB', 'GB']
-  let i = 0
-  let size = bytes
-  while (size >= 1024 && i < units.length - 1) { size /= 1024; i++ }
-  return `${size.toFixed(1)} ${units[i]}`
-}
 </script>
 
 <template>

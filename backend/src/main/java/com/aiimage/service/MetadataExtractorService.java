@@ -245,8 +245,16 @@ public class MetadataExtractorService {
             JsonNode inputs = samplerNode.get("inputs");
             if (inputs == null) return;
 
-            // Literal values
-            if (inputs.has("seed")) metadata.put("seed", String.valueOf(inputs.get("seed").asLong()));
+            // Seed — may be literal or a node reference (e.g. rgthree Seed node).
+            // KSamplerAdvanced uses "noise_seed" instead of "seed".
+            if (inputs.has("seed")) {
+                Long seed = resolveSeedRef(nodes, inputs.get("seed"), 0);
+                if (seed != null) metadata.put("seed", String.valueOf(seed));
+            }
+            if (!metadata.containsKey("seed") && inputs.has("noise_seed")) {
+                Long seed = resolveSeedRef(nodes, inputs.get("noise_seed"), 0);
+                if (seed != null) metadata.put("seed", String.valueOf(seed));
+            }
             if (inputs.has("steps")) metadata.put("steps", String.valueOf(inputs.get("steps").asInt()));
             if (inputs.has("cfg")) metadata.put("cfgScale", String.valueOf(inputs.get("cfg").asDouble()));
             if (inputs.has("sampler_name")) metadata.put("sampler", inputs.get("sampler_name").asText());
@@ -331,11 +339,25 @@ public class MetadataExtractorService {
             JsonNode inputs = targetNode.get("inputs");
             if (inputs == null) return null;
 
-            // Direct text input
+            // ConditioningZeroOut represents "no conditioning" — its input is the
+            // positive prompt, so following it would produce a false negativePrompt
+            if ("ConditioningZeroOut".equals(classType)) return null;
+
+            // Direct text input (most common: "text" field)
             if (inputs.has("text")) {
                 JsonNode textInput = inputs.get("text");
                 if (textInput.isTextual()) return textInput.asText();
                 if (textInput.isArray()) return resolveTextRef(nodes, textInput, depth + 1);
+            }
+
+            // Custom nodes like "CR Prompt Text" store prompt in a "prompt" field
+            if (inputs.has("prompt") && inputs.get("prompt").isTextual()) {
+                return inputs.get("prompt").asText();
+            }
+
+            // PrimitiveStringMultiline / PrimitiveString store text in a "value" field
+            if (inputs.has("value") && inputs.get("value").isTextual()) {
+                return inputs.get("value").asText();
             }
 
             // SDXL dual text encoders
@@ -421,6 +443,25 @@ public class MetadataExtractorService {
             // Recurse through model input
             if (inputs.has("model")) {
                 return resolveModelRef(nodes, inputs.get("model"), depth + 1);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolves a seed value through node references (handles rgthree Seed node, etc.).
+     */
+    private Long resolveSeedRef(JsonNode nodes, JsonNode ref, int depth) {
+        if (ref == null || depth > 5) return null;
+        if (ref.isNumber()) return ref.asLong();
+        if (ref.isArray() && ref.size() >= 1) {
+            String targetId = ref.get(0).asText();
+            JsonNode targetNode = nodes.get(targetId);
+            if (targetNode == null) return null;
+            JsonNode inputs = targetNode.get("inputs");
+            if (inputs == null) return null;
+            if (inputs.has("seed")) {
+                return resolveSeedRef(nodes, inputs.get("seed"), depth + 1);
             }
         }
         return null;
